@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.whereismyhome.house.house.dao.HouseMapper">
+    <select id="selectDealsByAptCode" parameterType="Map" resultMap="HouseDetailInfo">
+        SELECT 	deal.no,
+                deal.dealAmount,
+                deal.dealYear,
+                deal.dealMonth,
+                deal.area,
+                deal.floor,
+                info.aptCode,
+                info.buildYear,
+                info.roadName,
+                info.apartmentName,
+                info.jibun,
+                info.lng,
+                info.lat,
+                code.sidoName,
+                code.gugunName,
+                code.dongName
+        FROM 	housedeal deal, houseinfo info, dongcode code
+        where 	deal.aptCode = info.aptCode and
+                code.dongCode = info.dongCode and
+                info.dongCode = #{dongCode} and
+                info.aptCode = #{aptCode}
+        order by dealYear desc;
+    </select>
+
+    <select id="selectHousesByDongCode" parameterType="long" resultType="com.whereismyhome.house.house.VO.SearchResultVO">
+        SELECT 	i.aptCode, i.buildYear, i.roadName, i.roadNameBonbun, i.roadNameBubun, i.dongCode, i.apartmentName, i.lng, i.lat, c.sidoName, c.gugunName, c.dongName
+        FROM 	housedeal d, houseinfo i, dongcode c
+        WHERE 	d.aptCode = i.aptCode AND
+                c.dongCode = i.dongCode AND
+                i.dongCode = #{dongCode}
+        GROUP BY d.aptCode;
+    </select>
+
+    <select id="selectHousesByLatLng" parameterType="Map" resultMap="HouseDetailInfo">
+        SELECT 	deal.no,
+                  deal.dealAmount,
+                  deal.dealYear,
+                  deal.dealMonth,
+                  deal.area,
+                  deal.floor,
+                  info.aptCode,
+                  info.buildYear,
+                  info.roadName,
+                  info.apartmentName,
+                  info.jibun,
+                  info.lng,
+                  info.lat,
+                  code.sidoName,
+                  code.gugunName,
+                  code.dongName
+        FROM 	housedeal deal, houseinfo info, dongcode code
+        where 	deal.aptCode = info.aptCode and
+            code.dongCode = info.dongCode and
+            info.lng <![CDATA[ >= ]]> #{ha} and info.lng <![CDATA[ <= ]]> #{oa} and
+            info.lat <![CDATA[ >= ]]> #{qa} and info.lat <![CDATA[ <= ]]> #{pa}
+        order by dealYear desc;
+    </select>
+
+    <resultMap id="HouseDetailInfo" type="com.whereismyhome.house.house.VO.DetailResultVO">
+        <id property="aptCode" column="aptCode"/>
+        <result property="buildYear" column="buildYear"/>
+        <result property="roadName" column="roadName"/>
+        <result property="apartmentName" column="apartmentName"/>
+        <result property="jibun" column="jibun"/>
+        <result property="lng" column="lng"/>
+        <result property="lat" column="lat"/>
+        <result property="sidoName" column="sidoName"/>
+        <result property="gugunName" column="gugunName"/>
+        <result property="dongName" column="dongName"/>
+        <collection property="houseDeals" resultMap="houseDealList"/>
+    </resultMap>
+
+    <resultMap id="houseDealList" type="com.whereismyhome.house.house.VO.HouseDealVO">
+        <result property="no" column="no"/>
+        <result property="dealAmount" column="dealAmount"/>
+        <result property="dealYear" column="dealYear"/>
+        <result property="dealMonth" column="dealMonth"/>
+        <result property="area" column="area"/>
+        <result property="floor" column="floor"/>
+        <result property="aptCode" column="aptCode"/>
+    </resultMap>
+</mapper>
